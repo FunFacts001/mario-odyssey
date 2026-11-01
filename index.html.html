@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Mario Odyssey - Temps Réel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e52521;
+            --secondary: #f3cd00;
+            --dark: #1a1a2e;
+            --light: #fdfdfd;
+            --accent: #0099ff;
+            --card-bg: rgba(255, 255, 255, 0.96);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 850px; margin: 0 auto; }
+
+        header { text-align: center; margin-bottom: 25px; color: white; }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--secondary);
+            font-size: 2.3rem;
+            text-shadow: 3px 3px 0px var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 4px solid var(--secondary);
+        }
+
+        h2 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+
+        label { display: block; font-weight: 600; margin-bottom: 5px; }
+
+        select, input[type="range"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            background: #fff;
+        }
+
+        .toggle-box {
+            background: #fff0f0;
+            border: 2px dashed var(--primary);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #c41c19 100%);
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #9b1412;
+            text-transform: uppercase;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #9b1412; }
+        .btn-secondary { background: linear-gradient(135deg, var(--accent) 0%, #0077cc 100%); box-shadow: 0 4px 0 #005599; }
+
+        .challenge-card {
+            background: #fff8e8;
+            border: 2px dashed var(--secondary);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+
+        .challenge-item { margin-bottom: 8px; font-size: 1.05rem; }
+        .challenge-item strong { color: var(--primary); }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .players-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .player-card {
+            background: #222;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 6px solid var(--primary);
+        }
+
+        .player-header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .moon-tracker {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .moon-counter {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4rem;
+            color: var(--secondary);
+        }
+
+        .counter-btns { display: flex; gap: 8px; }
+
+        .counter-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .counter-btn:disabled { background: #555; cursor: not-allowed; opacity: 0.5; }
+
+        .progress-bar-container {
+            width: 100%;
+            background: #444;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s ease; }
+
+        .hidden { display: none !important; }
+        .room-tag {
+            background: #222;
+            color: var(--secondary);
+            font-family: 'Fredoka One', cursive;
+            padding: 5px 12px;
+            border-radius: 8px;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Super Mario Odyssey</h1>
+            <p>Randomizer Multijoueur en Temps Réel</p>
+        </header>
+
+        <!-- ECRAN 1: REJOINDRE OU CRÉER -->
+        <div class="card" id="screen-lobby">
+            <h2>🎮 Configuration du Salon</h2>
+            
+            <div class="form-group">
+                <label for="player-name">Ton Pseudo :</label>
+                <input type="text" id="player-name" placeholder="Ex: Mario, Luigi..." maxlength="12">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                <button class="btn" onclick="showCreateRoom()">Créer un Salon</button>
+                <button class="btn btn-secondary" onclick="showJoinRoom()">Rejoindre un Salon</button>
+            </div>
+
+            <!-- OPTIONS DE CRÉATION -->
+            <div id="create-options" class="hidden" style="margin-top: 20px; border-top: 2px dashed #ccc; padding-top: 15px;">
+                <div class="toggle-box">
+                    <label class="checkbox-label" style="background:transparent; padding:0;">
+                        <input type="checkbox" id="is-postgame">
+                        <span>👑 <strong>Histoire terminée (Post-game)</strong></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="moon-mode">Règle de Quota de Lunes :</label>
+                    <select id="moon-mode">
+                        <option value="game">Quotas officiels du jeu</option>
+                        <option value="fixed">Quota Fixe personnalisé</option>
+                        <option value="random">Quota Aléatoire (Plage)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="fixed-moon-group" style="display: none;">
+                    <label for="fixed-quota">Nombre de lunes requises : <span id="fixed-val">15</span></label>
+                    <input type="range" id="fixed-quota" min="5" max="50" value="15" oninput="document.getElementById('fixed-val').innerText=this.value">
+                </div>
+
+                <button class="btn" onclick="createRoomProcess()">🚀 Créer et Obtenir le Code</button>
+            </div>
+
+            <!-- FORMULAIRE DE REJONCTION -->
+            <div id="join-options" class="hidden" style="margin-top: 20px; border-top: 2px dashed #ccc; padding-top: 15px;">
+                <div class="form-group">
+                    <label for="room-code-input">Code du Salon (5 lettres) :</label>
+                    <input type="text" id="room-code-input" placeholder="Ex: MARIO" style="text-transform: uppercase;">
+                </div>
+                <button class="btn btn-secondary" onclick="joinRoomProcess()">Entrer dans le Salon</button>
+            </div>
+        </div>
+
+        <!-- ECRAN 2: JEU EN TEMPS RÉEL -->
+        <div class="card hidden" id="screen-game">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2>🎯 Défi en Cours</h2>
+                <div>Code Salon : <span class="room-tag" id="display-room-code">-----</span></div>
+            </div>
+
+            <div id="kingdom-display" style="font-family:'Fredoka One', cursive; font-size: 1.4rem; color: var(--primary); margin-bottom: 10px;"></div>
+            
+            <div class="challenge-card" id="challenge-content"></div>
+
+            <h3 style="margin-top: 20px; color: var(--dark);">Joueurs en Direct :</h3>
+            <div class="players-container" id="players-dashboards"></div>
+
+            <button class="btn btn-secondary hidden" id="next-kingdom-btn" style="margin-top:20px;" onclick="nextKingdomRemote()">✨ Pays Suivant (Valider pour Tous)</button>
+            <button class="btn" style="background:#555; box-shadow: 0 4px 0 #333; margin-top:10px;" onclick="leaveRoom()">🚪 Quitter le Salon</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, deleteField } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSj8f96a2eD7fuHr5gAjlHDbM38uAax5I",
+            authDomain: "marioodysseyrandomizer.firebaseapp.com",
+            projectId: "marioodysseyrandomizer",
+            storageBucket: "marioodysseyrandomizer.firebasestorage.app",
+            messagingSenderId: "128947453793",
+            appId: "1:128947453793:web:1289029c45e81a3e018f20"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // DONNÉES DU JEU
+        const storyKingdoms = [
+            { name: "Pays des Chapeaux", storyMoons: 0, postMoons: 31, activities: ["Trouver le tuyau secret caché", "Réussir la course-poursuite Koopa", "Acheter le poncho exclusif"] },
+            { name: "Pays des Cascades", storyMoons: 5, postMoons: 40, activities: ["Vaincre le Chomp d'acier géant", "Explorer la zone secrète de la cascade", "Défis de saut avec le T-Rex"] },
+            { name: "Pays des Sables", storyMoons: 16, postMoons: 89, activities: ["Terminer le rallye en voiture électrique", "Jeu de la Jave (correspondance de têtes)", "Explorer le souterrain de la pyramide"] },
+            { name: "Pays du Lac", storyMoons: 8, postMoons: 42, activities: ["Explorer le dôme du trésor", "Course-poursuite de Koopa aquatique", "Clé cachée sous le plancher de verre"] },
+            { name: "Pays des Bois", storyMoons: 16, postMoons: 76, activities: ["Cultiver la graine secrète dans le potager", "Labyrinthe de la fleur Piranha", "Nettoyer les flaques de poison"] },
+            { name: "Pays des Nuages", storyMoons: 0, postMoons: 9, activities: ["Duel aérien contre Bowser", "Blocs invisibles de pièces cachées"] },
+            { name: "Pays Perdu", storyMoons: 10, postMoons: 35, activities: ["Récupérer les pièces de l'Odyssée", "Maskass géant sur plateformes", "Traverser la jungle toxique"] },
+            { name: "Mégalopole (New Donk)", storyMoons: 20, postMoons: 81, activities: ["Défi de la corde à sauter (50+ sauts)", "Course de voiture RC", "Festival rétro 8-bit"] },
+            { name: "Pays de la Mer", storyMoons: 10, postMoons: 71, activities: ["Match de Volleyball (15+ échanges)", "Nettoyage des sources chaudes", "Grottes marines secrètes"] },
+            { name: "Pays de la Neige", storyMoons: 10, postMoons: 55, activities: ["Course de glisse (Slalom)", "Récupérer les blocs de glace", "Sauts en Shiverien"] },
+            { name: "Pays des Fourneaux", storyMoons: 18, postMoons: 68, activities: ["Préparer le ragoût géant", "Escalade en lave avec la Bulle", "Course-poursuite volcanique"] },
+            { name: "Pays de Bowser", storyMoons: 8, postMoons: 62, activities: ["Mini-jeu du Hanafuda", "Infiltration des toits ninjas", "Vaincre le boss Broodal"] },
+            { name: "Pays de la Lune", storyMoons: 0, postMoons: 38, activities: ["Parcours gravité lunaire sans checkpoint", "Cérémonie de mariage"] }
+        ];
+
+        const postGameKingdoms = [
+            { name: "Royaume Champignon", storyMoons: 43, postMoons: 104, activities: ["Re-combattre un boss au château", "Course Yoshi sur les toits", "Tableau secret de défi"] },
+            { name: "Côté Obscur", storyMoons: 24, postMoons: 24, activities: ["Affronter le Broodals Rush", "Parcours du robot chapelier"] },
+            { name: "Côté Très Très Sombre", storyMoons: 1, postMoons: 1, activities: ["Test suprême de survie sans chapeau", "Parcours de lave extrême"] }
+        ];
+
+        const captures = ["T-Rex", "Grenouille", "Goomba (Tour)", "Chomp", "Frère Marto", "Cheep Cheep", "Lava Bubble", "Glouton / Pakkun", "Wiggler Tropical"];
+        const moves = ["Interdiction du saut en longueur", "Pas de double / triple saut", "Cappy obligatoire pour chaque saut", "Pas de roulades prolongées", "Interdiction de se soigner aux points de contrôle"];
+        const costumes = ["Costume d'explorateur", "Mario classique (8-bit)", "Costume de Spéléologue", "Costume de Golfeur", "Costume de Constructeur", "Tenue de Marié / Smoking"];
+
+        let myPlayerId = 'p_' + Math.random().toString(36).substring(2, 9);
+        let myPlayerName = '';
+        let currentRoomId = null;
+        let unsubscribeRoom = null;
+
+        window.showCreateRoom = function() {
+            document.getElementById('create-options').classList.remove('hidden');
+            document.getElementById('join-options').classList.add('hidden');
+        }
+
+        window.showJoinRoom = function() {
+            document.getElementById('join-options').classList.remove('hidden');
+            document.getElementById('create-options').classList.add('hidden');
+        }
+
+        document.getElementById('moon-mode').addEventListener('change', function() {
+            document.getElementById('fixed-moon-group').style.display = (this.value === 'fixed') ? 'block' : 'none';
+        });
+
+        function generateRoomCode() {
+            return Math.random().toString(36).substring(2, 7).toUpperCase();
+        }
+
+        function getDeterministicRandom(seedStr, kingdomIdx, salt) {
+            let str = seedStr + "_" + kingdomIdx + "_" + salt;
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            let x = Math.sin(Math.abs(hash)) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function getSeededItem(arr, seedStr, kingdomIdx, salt) {
+            let rand = getDeterministicRandom(seedStr, kingdomIdx, salt);
+            return arr[Math.floor(rand * arr.length)];
+        }
+
+        window.createRoomProcess = async function() {
+            const nameInput = document.getElementById('player-name').value.trim();
+            if (!nameInput) { alert("Entre un pseudo !"); return; }
+            myPlayerName = nameInput;
+
+            const isPostgame = document.getElementById('is-postgame').checked;
+            const moonMode = document.getElementById('moon-mode').value;
+            const fixedQuota = parseInt(document.getElementById('fixed-quota').value) || 15;
+            const code = generateRoomCode();
+
+            const roomData = {
+                code: code,
+                isPostgame: isPostgame,
+                moonMode: moonMode,
+                fixedQuota: fixedQuota,
+                kingdomIndex: 0,
+                seed: Math.random().toString(36).substring(2, 8).toUpperCase(),
+                players: {
+                    [myPlayerId]: { name: myPlayerName, moons: 0 }
+                }
+            };
+
+            try {
+                await setDoc(doc(db, "rooms", code), roomData);
+                listenToRoom(code);
+            } catch (e) {
+                alert("Erreur Firebase : " + e.message);
+            }
+        }
+
+        window.joinRoomProcess = async function() {
+            const nameInput = document.getElementById('player-name').value.trim();
+            const codeInput = document.getElementById('room-code-input').value.trim().toUpperCase();
+
+            if (!nameInput || !codeInput) { alert("Remplis ton pseudo et le code du salon !"); return; }
+            myPlayerName = nameInput;
+
+            const roomRef = doc(db, "rooms", codeInput);
+            const docSnap = await getDoc(roomRef);
+
+            if (!docSnap.exists()) { alert("Ce salon n'existe pas !"); return; }
+
+            await updateDoc(roomRef, {
+                [`players.${myPlayerId}`]: { name: myPlayerName, moons: 0 }
+            });
+
+            listenToRoom(codeInput);
+        }
+
+        function listenToRoom(code) {
+            currentRoomId = code;
+            document.getElementById('display-room-code').innerText = code;
+            document.getElementById('screen-lobby').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+
+            if (unsubscribeRoom) unsubscribeRoom();
+
+            unsubscribeRoom = onSnapshot(doc(db, "rooms", code), (snapshot) => {
+                if (!snapshot.exists()) {
+                    alert("Le salon a été fermé.");
+                    leaveRoom();
+                    return;
+                }
+                renderGameRoom(snapshot.data());
+            });
+        }
+
+        function renderGameRoom(data) {
+            let kingdomList = !data.isPostgame ? storyKingdoms : [...storyKingdoms, ...postGameKingdoms];
+            const currentKingdom = kingdomList[data.kingdomIndex] || kingdomList[0];
+
+            const badgeText = data.isPostgame ? 'POST-GAME' : 'HISTOIRE PRINCIPALE';
+            document.getElementById('kingdom-display').innerHTML = `🌍 Étape ${data.kingdomIndex + 1}/${kingdomList.length} : ${currentKingdom.name} <span class="badge">${badgeText}</span>`;
+
+            let targetMoons = 10;
+            if (!data.isPostgame && currentKingdom.storyMoons === 0) {
+                targetMoons = 0;
+            } else if (data.moonMode === 'game') {
+                targetMoons = currentKingdom.storyMoons > 0 ? currentKingdom.storyMoons : 5;
+            } else if (data.moonMode === 'fixed') {
+                targetMoons = data.fixedQuota;
+            } else {
+                const maxMoons = data.isPostgame ? currentKingdom.postMoons : Math.max(currentKingdom.storyMoons, 15);
+                const minMoons = Math.max(3, currentKingdom.storyMoons);
+                let randVal = getDeterministicRandom(data.seed, data.kingdomIndex, 'targetMoons');
+                targetMoons = Math.floor(randVal * (maxMoons - minMoons + 1)) + minMoons;
+            }
+
+            let kIdx = data.kingdomIndex;
+            let html = '';
+            if (!data.isPostgame && currentKingdom.storyMoons === 0) {
+                html += `<div class="challenge-item" style="color: #e52521;"><strong>⚠️ Pays de transition :</strong> Aucune lune requise !</div>`;
+            }
+            html += `<div class="challenge-item"><strong>Capture imposée :</strong> ${getSeededItem(captures, data.seed, kIdx, 'capture')}</div>`;
+            html += `<div class="challenge-item"><strong>Contrainte de mouvement :</strong> ${getSeededItem(moves, data.seed, kIdx, 'move')}</div>`;
+            html += `<div class="challenge-item"><strong>Déguisement obligatoire :</strong> ${getSeededItem(costumes, data.seed, kIdx, 'costume')}</div>`;
+            html += `<div class="challenge-item"><strong>Activité / Mini-jeu du pays :</strong> ${getSeededItem(currentKingdom.activities, data.seed, kIdx, 'activity')}</div>`;
+
+            document.getElementById('challenge-content').innerHTML = html;
+
+            const playersContainer = document.getElementById('players-dashboards');
+            playersContainer.innerHTML = '';
+
+            let players = data.players || {};
+            let anyFinished = targetMoons === 0;
+
+            Object.keys(players).forEach(pId => {
+                let p = players[pId];
+                if (p.moons >= targetMoons) anyFinished = true;
+
+                let pct = targetMoons === 0 ? 100 : Math.min(100, (p.moons / targetMoons) * 100);
+                let isMe = pId === myPlayerId;
+
+                let card = document.createElement('div');
+                card.className = 'player-card';
+                card.innerHTML = `
+                    <div class="player-header">
+                        <span>🎮 ${p.name} ${isMe ? '(Moi)' : ''}</span>
+                        <span>${targetMoons === 0 || p.moons >= targetMoons ? '👑 TERMINÉ !' : ''}</span>
+                    </div>
+                    <div class="moon-tracker">
+                        <div>
+                            <div style="font-size: 0.8rem; opacity: 0.8;">Lunes collectées</div>
+                            <div class="moon-counter">${p.moons} / ${targetMoons}</div>
+                        </div>
+                        <div class="counter-btns">
+                            <button class="counter-btn" onclick="window.changeMyMoons('${pId}', ${p.moons}, -1)" ${!isMe ? 'disabled' : ''}>-</button>
+                            <button class="counter-btn" onclick="window.changeMyMoons('${pId}', ${p.moons}, 1)" ${!isMe ? 'disabled' : ''}>+</button>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: ${pct}%;"></div>
+                    </div>
+                `;
+                playersContainer.appendChild(card);
+            });
+
+            const nextBtn = document.getElementById('next-kingdom-btn');
+            if (anyFinished && data.kingdomIndex < kingdomList.length - 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.add('hidden');
+            }
+        }
+
+        window.changeMyMoons = async function(pId, currentMoons, change) {
+            if (!currentRoomId || pId !== myPlayerId) return;
+            let newMoons = Math.max(0, currentMoons + change);
+            const roomRef = doc(db, "rooms", currentRoomId);
+            await updateDoc(roomRef, {
+                [`players.${myPlayerId}.moons`]: newMoons
+            });
+        }
+
+        window.nextKingdomRemote = async function() {
+            if (!currentRoomId) return;
+            const roomRef = doc(db, "rooms", currentRoomId);
+            const docSnap = await getDoc(roomRef);
+            if (!docSnap.exists()) return;
+
+            const data = docSnap.data();
+            let updatedPlayers = {};
+            Object.keys(data.players).forEach(pId => {
+                updatedPlayers[pId] = { name: data.players[pId].name, moons: 0 };
+            });
+
+            await updateDoc(roomRef, {
+                kingdomIndex: data.kingdomIndex + 1,
+                players: updatedPlayers
+            });
+        }
+
+        window.leaveRoom = async function() {
+            if (currentRoomId) {
+                try {
+                    const roomRef = doc(db, "rooms", currentRoomId);
+                    await updateDoc(roomRef, {
+                        [`players.${myPlayerId}`]: deleteField()
+                    });
+                } catch(e) {}
+            }
+            if (unsubscribeRoom) unsubscribeRoom();
+            currentRoomId = null;
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-lobby').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
