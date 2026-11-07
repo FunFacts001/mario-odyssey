@@ -327,7 +327,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // DONNÉES DU JEU
         const storyKingdoms = [
             { name: "Pays des Chapeaux", storyMoons: 0, postMoons: 31, activities: ["Trouver le tuyau secret caché", "Réussir la course-poursuite Koopa", "Acheter le poncho exclusif"] },
             { name: "Pays des Cascades", storyMoons: 5, postMoons: 40, activities: ["Vaincre le Chomp d'acier géant", "Explorer la zone secrète de la cascade", "Défis de saut avec le T-Rex"] },
@@ -354,8 +353,11 @@
         const moves = ["Interdiction du saut en longueur", "Pas de double / triple saut", "Cappy obligatoire pour chaque saut", "Pas de roulades prolongées", "Interdiction de se soigner aux points de contrôle"];
         const costumes = ["Costume d'explorateur", "Mario classique (8-bit)", "Costume de Spéléologue", "Costume de Golfeur", "Costume de Constructeur", "Tenue de Marié / Smoking"];
 
-        let myPlayerId = 'p_' + Math.random().toString(36).substring(2, 9);
-        let myPlayerName = '';
+        let myPlayerId = localStorage.getItem('mario_player_id');
+        if (!myPlayerId) {
+            myPlayerId = 'p_' + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem('mario_player_id', myPlayerId);
+        }
         let currentRoomId = null;
         let unsubscribeRoom = null;
 
@@ -396,7 +398,6 @@
         window.createRoomProcess = async function() {
             const nameInput = document.getElementById('player-name').value.trim();
             if (!nameInput) { alert("Entre un pseudo !"); return; }
-            myPlayerName = nameInput;
 
             const isPostgame = document.getElementById('is-postgame').checked;
             const moonMode = document.getElementById('moon-mode').value;
@@ -410,7 +411,7 @@
                 fixedQuota: fixedQuota,
                 seed: Math.random().toString(36).substring(2, 8).toUpperCase(),
                 players: {
-                    [myPlayerId]: { name: myPlayerName, moons: 0, kingdomIndex: 0, finished: false }
+                    [myPlayerId]: { name: nameInput, moons: 0, kingdomIndex: 0, finished: false, joinedAt: Date.now() }
                 }
             };
 
@@ -427,17 +428,24 @@
             const codeInput = document.getElementById('room-code-input').value.trim().toUpperCase();
 
             if (!nameInput || !codeInput) { alert("Remplis ton pseudo et le code du salon !"); return; }
-            myPlayerName = nameInput;
 
             const roomRef = doc(db, "rooms", codeInput);
             const docSnap = await getDoc(roomRef);
 
             if (!docSnap.exists()) { alert("Ce salon n'existe pas !"); return; }
 
-            await updateDoc(roomRef, {
-                [`players.${myPlayerId}`]: { name: myPlayerName, moons: 0, kingdomIndex: 0, finished: false }
-            });
+            let roomData = docSnap.data();
+            let players = roomData.players || {};
 
+            // Si le joueur n'est pas déjà dans la liste, on vérifie s'il y a de la place ou on l'ajoute
+            if (!players[myPlayerId]) {
+                players[myPlayerId] = { name: nameInput, moons: 0, kingdomIndex: 0, finished: false, joinedAt: Date.now() };
+            } else {
+                // Met à jour son pseudo s'il change
+                players[myPlayerId].name = nameInput;
+            }
+
+            await updateDoc(roomRef, { players: players });
             listenToRoom(codeInput);
         }
 
@@ -461,15 +469,18 @@
 
         function renderGameRoom(data) {
             let kingdomList = !data.isPostgame ? storyKingdoms : [...storyKingdoms, ...postGameKingdoms];
-            let myData = data.players[myPlayerId];
+            let players = data.players || {};
+            let myData = players[myPlayerId];
 
-            if (myData && myData.finished) {
+            if (!myData) return;
+
+            if (myData.finished) {
                 document.getElementById('screen-game').classList.add('hidden');
                 document.getElementById('screen-congrats').classList.remove('hidden');
                 return;
             }
 
-            let myKingdomIdx = myData ? myData.kingdomIndex : 0;
+            let myKingdomIdx = myData.kingdomIndex || 0;
             const currentKingdom = kingdomList[myKingdomIdx] || kingdomList[0];
 
             const badgeText = data.isPostgame ? 'POST-GAME' : 'HISTOIRE PRINCIPALE';
@@ -503,9 +514,14 @@
             const playersContainer = document.getElementById('players-dashboards');
             playersContainer.innerHTML = '';
 
-            let players = data.players || {};
+            // Tri fixe par ordre d'arrivée (joinedAt) pour que les cartes ne bougent jamais de place
+            let sortedPlayerIds = Object.keys(players).sort((a, b) => {
+                let timeA = players[a].joinedAt || 0;
+                let timeB = players[b].joinedAt || 0;
+                return timeA - timeB;
+            });
 
-            Object.keys(players).forEach(pId => {
+            sortedPlayerIds.forEach(pId => {
                 let p = players[pId];
                 let pKingdomIdx = p.kingdomIndex || 0;
                 let pKingdom = kingdomList[pKingdomIdx] || kingdomList[0];
@@ -532,7 +548,7 @@
                 card.innerHTML = `
                     <div class="player-header">
                         <span>🎮 ${p.name} ${isMe ? '(Moi)' : ''}</span>
-                        <span>${p.finished ? '🏆 RUN TERMINÉE !' : `📍 ${pKingdom.name}`}</span>
+                        <span>${p.finished ? '🏆 TERMINÉ' : `📍 ${pKingdom.name}`}</span>
                     </div>
                     <div class="moon-tracker">
                         <div>
@@ -551,7 +567,6 @@
                 playersContainer.appendChild(card);
             });
 
-            // Bouton individuel pour passer au monde suivant
             const nextBtn = document.getElementById('next-kingdom-btn');
             if (myData && (myData.moons >= targetMoons || targetMoons === 0)) {
                 nextBtn.classList.remove('hidden');
